@@ -1,0 +1,18 @@
+<div id="time" ng-controller="ClockController">
+    <h1>{{ clock | date : "hh mm ss a" }}</h1>
+    <h2>{{ clock | date : "MM dd yyyy" }}</h2>
+</div>
+<div id="weather" ng-controller="WeatherController">
+    <h3 id="userLocation">{{ userLocation.city }}, {{ userLocation.state }}</h3>
+    <div ng-repeat="day in weather.forecast.forecastday" class="col-md-3 weather-day">
+        <img class="{{ day.icon }}" ng-src="{{ day.icon_url }}">
+        
+        <h4 class="weekday" ng-if="$index == 0">Today<h4>
+        <h4 class="weekday" ng-if="$index != 0">{{ day.date.weekday }}</h4>
+
+        <h2 class="conditions">{{ day.conditions }}</h2>
+        <h1 class="temperature-high">{{ day.high.celsius }}</h1>
+        <h3 class="temperature-low">{{ day.low.celsius }}</h3>
+    </div>
+    <!-- <pre>{{ weather.forecast | json }}</pre> -->
+</div>
