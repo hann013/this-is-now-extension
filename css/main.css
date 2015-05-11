@@ -1,8 +1,9 @@
+/* Date and time */
 #time
 {
     text-align: center;
     color: white;
-    padding: 2%;
+    padding: 11%;
 }
 
 #time h1
@@ -29,29 +30,64 @@
     text-shadow: 0 0 0.2em black, 0 0 0.2em #00248F;  
 }
 
+/* Weather */
 #userLocation
 {
-    text-align: center;
+    margin-top: 1%;
+    margin-bottom: 0;
+}
+
+#weather
+{
+    position: absolute;
+    top: 0;
+    left: 10px;
+    width: 100%;
 }
 
 .weather-day
 {
+    display: inline-block;
+    padding-top: 10px;
+    padding-right: 30px;
     text-align: center;
 }
 
+.weather-day p
+{
+    margin: 0;
+}
+
+.weekday
+{
+    font-size: 0.7em;
+}
+
+.conditions
+{
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.temperature
+{
+    color: #00248F;
+}
+
+/* Buttons */
 #settings
 {
     text-align: right;
 }
 
-.glyphicon
+#settings .glyphicon
 {
     text-shadow: 0 0 0.2em black, 0 0 0.2em #87F;
     font-size: 2em;
     padding: 5px;
 }
 
-a:link
+#settings a:link
 {
     color: white;
     text-decoration: none;
