@@ -1,4 +1,4 @@
-var app = angular.module("CurrentlyApp", ['ngRoute']);
+var app = angular.module("ThisIsNowApp", ['ngRoute']);
 
 // Display and update the time and date
 app.controller("ClockController", function($scope) {
@@ -17,6 +17,7 @@ app.controller("ClockController", function($scope) {
 });
 
 app.controller("WeatherController", function($scope, WeatherForecast) {
+    $scope.showForecast = false;
     $scope.weather = {};
 
     navigator.geolocation.getCurrentPosition(setPosition, errorHandler);
@@ -29,12 +30,17 @@ app.controller("WeatherController", function($scope, WeatherForecast) {
         WeatherForecast.getWeatherForecast(userLocation)
         .then(function(data){
             $scope.userLocation = data[0];
+            $scope.weather.today = data[1].forecastday[0];
             $scope.weather.forecast = data[1];
         });
     }
 
     function errorHandler(err) {
         console.log(err);
+    }
+
+    function alertHello() {
+        alert("hello!");
     }
 });
 
