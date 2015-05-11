@@ -38,10 +38,6 @@ app.controller("WeatherController", function($scope, WeatherForecast) {
     function errorHandler(err) {
         console.log(err);
     }
-
-    function alertHello() {
-        alert("hello!");
-    }
 });
 
 // Display weather information
