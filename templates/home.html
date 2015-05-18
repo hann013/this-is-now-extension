@@ -1,20 +1,27 @@
-<div id="time" ng-controller="ClockController">
-    <h1>{{ clock | date : "hh mm ss a" }}</h1>
-    <h2>{{ clock | date : "MM dd yyyy" }}</h2>
-</div>
-<div id="weather" ng-controller="WeatherController">
-    <p id="userLocation" ng-show="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
-    <div class="weather-day" ng-click="showForecast = !showForecast" ng-show="weather.today">
-        <img class="{{ weather.today.icon }}" ng-src="{{ weather.today.icon_url }}">
-        <p class="weekday" ng-show="showForecast">Today<p>
-        <p class="conditions">{{ weather.today.conditions }}</p>
-        <p class="temperature"><span class="high">{{ weather.today.high.celsius }}</span>  |  <span class="low">{{ weather.today.low.celsius }}</span></p>
+<div id="background" ng-style="{ 'background-image': 'url({{ user.backgroundImage }})' }">
+    <div id="time" ng-controller="ClockController">
+        <h1>{{ clock | date : "hh mm ss a" }}</h1>
+        <h2>{{ clock | date : "MM dd yyyy" }}</h2>
     </div>
-    <div class="weather-day" ng-show="showForecast" ng-repeat="day in weather.forecast.forecastday" ng-if="!$first">
-        <img class="{{ day.icon }}" ng-src="{{ day.icon_url }}">
-        <p class="weekday">{{ day.date.weekday }}</p>
-        <p class="conditions">{{ day.conditions }}</p>
-        <p class="temperature"><span class="high">{{ day.high.celsius }}</span>  |  <span class="low">{{ day.low.celsius }}</span></p>
+    <div id="weather" ng-controller="WeatherController">
+        <p id="userLocation" ng-show="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
+        <div class="weather-day" id="today" ng-mouseover="showWeatherHover()" ng-click="showForecast = !showForecast" ng-show="weather.today">
+            <img class="{{ weather.today.icon }}" ng-src="{{ weather.today.icon_url }}">
+            <p class="weekday" ng-show="showForecast">Today<p>
+            <p class="conditions">{{ weather.today.conditions }}</p>
+            <p class="temperature"><span class="high">{{ weather.today.high.celsius }}</span>  |  <span class="low">{{ weather.today.low.celsius }}</span></p>
+            <div id="showWeather"></div>
+        </div>
+        <div class="weather-day" ng-show="showForecast" ng-repeat="day in weather.forecast.forecastday" ng-if="!$first">
+            <img class="{{ day.icon }}" ng-src="{{ day.icon_url }}">
+            <p class="weekday">{{ day.date.weekday }}</p>
+            <p class="conditions">{{ day.conditions }}</p>
+            <p class="temperature"><span class="high">{{ day.high.celsius }}</span>  |  <span class="low">{{ day.low.celsius }}</span></p>
+        </div>
     </div>
-    <!-- <pre>{{ weather.forecast | json }}</pre> -->
+    <a class="glyphicon glyphicon-list-alt" id="showToDo" ng-click="showToDoList = !showToDoList"></a>
+    <div id="toDo" ng-controller="ToDoController" ng-show="showToDoList">
+        <h4>To do:</h4>
+        <a class="toDoList glyphicon glyphicon-plus" id="addNew" ng-click="addTask()" ng-hide="hideAddNew"> Add a task</a>
+    </div> 
 </div>

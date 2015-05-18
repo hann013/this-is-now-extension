@@ -1,8 +1,18 @@
-<!-- 
-TODO:
-
-Implement changing and saving of user settings:
-- location override
-- background image/colour
-
--->
+<div class="container">
+    <h1>Settings</h1>
+    <form ng-submit="save()">
+      Location:
+      <input type="text"
+              ng-model="user.location"
+              auto-fill="getCityResults"
+              autocomplete="off"
+              placeholder="Enter a location" />
+      
+      Background image:
+      <input type="text"
+             ng-model="user.backgroundImage"
+             placeholder="Enter a file path" />
+      <input class="btn btn-primary" 
+            type="submit" value="Save" />
+    </form>
+</div>
