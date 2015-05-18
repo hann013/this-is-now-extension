@@ -25,19 +25,23 @@ app.controller("ToDoController", function($scope, $compile) {
     $scope.hideAddNew = false;
     $scope.tasks = [];
 
+    $scope.updateTaskCount = function() {
+        $scope.taskCount = $(".task").length;
+    }
+
     $scope.changeAddNew = function(val) {
         $scope.hideAddNew = val;
     }
 
     $scope.addTask = function() {
-        var toDoList = $("#toDo");
         var newTask = $(document.createElement("to-do-item"));
+        newTask.insertBefore("#addNew");
+        $compile(newTask)($scope);
 
         $scope.changeAddNew(true);
-
-        toDoList.append(newTask);
-        $compile(newTask)($scope);
     }
+
+    $scope.updateTaskCount();
 });
 
 app.directive("toDoItem", function() {
@@ -48,15 +52,30 @@ app.directive("toDoItem", function() {
         link: function(scope, element, attrs) {
             scope.saved = false;
 
+            element.on("mouseover", function() {
+                deleteButton.css("opacity", "1");
+            });
+
+            element.on("mouseleave", function() {
+                deleteButton.css("opacity", "0");
+            });
+
             var textArea = $(element).find(".taskDescription");
-            textArea.bind('dblclick', function() {
+            textArea.keydown(function(e) {
+                if (e.keyCode == 13) {
+                    e.preventDefault();
+                    saveButton.click();
+                }
+            });
+
+            textArea.on('dblclick', function() {
                 scope.saved = false;
                 textArea.removeClass("done");
                 checkbox.prop("checked", false);
             });
 
             var checkbox = $(element).find(".checkTask");
-            checkbox.bind('click', function() {
+            checkbox.on('click', function() {
                 var checked = checkbox.is(":checked");
 
                 if (checked) {
@@ -68,16 +87,16 @@ app.directive("toDoItem", function() {
             });
 
             var saveButton = $(element).find(".saveTask");
-            
-            saveButton.bind('click', function() {
+            saveButton.on('click', function() {
                 scope.saved = true;
-                scope.changeAddNew(false);                
+                scope.changeAddNew(false);
+                scope.updateTaskCount();
             });
 
             var deleteButton = $(element).find(".deleteTask");
-
-            deleteButton.bind('click', function() {
+            deleteButton.on('click', function() {
                 element.remove();
+                scope.updateTaskCount();
             });
         }
     }
@@ -113,8 +132,12 @@ app.controller("WeatherController", function($scope, WeatherForecast) {
 
         weatherHover.style.opacity = 0.75; 
         
-        if ($scope.showForecast) { weatherHover.innerHTML = "Hide forecast"; }
-        else { weatherHover.innerHTML = "Show forecast"; }
+        if ($scope.showForecast) { 
+            weatherHover.innerHTML = "Hide forecast"; 
+        }
+        else { 
+            weatherHover.innerHTML = "Show forecast"; 
+        }
 
         today.addEventListener("mouseleave", function() {
             weatherHover.style.opacity = 0;

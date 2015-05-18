@@ -21,7 +21,7 @@
     </div>
     <a class="glyphicon glyphicon-list-alt" id="showToDo" ng-click="showToDoList = !showToDoList"></a>
     <div id="toDo" ng-controller="ToDoController" ng-show="showToDoList">
-        <h4>To do:</h4>
+        <h4>{{ taskCount }} THINGS TO DO:</h4>
         <a class="toDoList glyphicon glyphicon-plus" id="addNew" ng-click="addTask()" ng-hide="hideAddNew"> Add a task</a>
     </div> 
 </div>
