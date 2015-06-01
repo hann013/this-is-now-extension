@@ -21,27 +21,28 @@ app.controller("ClockController", function($scope) {
     }, 1000);
 });
 
-app.controller("ToDoController", function($scope, $compile) {
-    $scope.hideAddNew = false;
-    $scope.tasks = [];
+app.controller("ToDoController", function($scope, $compile, UserService) {
+    $scope.user.tasks = UserService.user.tasks;
+    $scope.taskCount = $scope.user.tasks.length;
 
-    $scope.updateTaskCount = function() {
-        $scope.taskCount = $(".task").length;
-    }
-
-    $scope.changeAddNew = function(val) {
-        $scope.hideAddNew = val;
-    }
+    $scope.$watch(function(scope) { return scope.user.tasks.length; },
+        function(updatedValue) { $scope.taskCount = updatedValue; } 
+    );
 
     $scope.addTask = function() {
         var newTask = $(document.createElement("to-do-item"));
         newTask.insertBefore("#addNew");
         $compile(newTask)($scope);
-
-        $scope.changeAddNew(true);
     }
 
-    $scope.updateTaskCount();
+    $scope.save = function() {
+        UserService.save();
+    }
+
+    $("#toDo").sortable({ 
+        cursor: "move",
+        items: ">> .task", 
+    });
 });
 
 app.directive("toDoItem", function() {
@@ -50,13 +51,10 @@ app.directive("toDoItem", function() {
         scope: true,
         templateUrl: "/templates/to-do-item.html",
         link: function(scope, element, attrs) {
-            scope.saved = false;
-
             element.on("mouseover", function() {
                 deleteButton.css("opacity", "1");
-            });
-
-            element.on("mouseleave", function() {
+            })
+            .on("mouseleave", function() {
                 deleteButton.css("opacity", "0");
             });
 
@@ -66,10 +64,9 @@ app.directive("toDoItem", function() {
                     e.preventDefault();
                     saveButton.click();
                 }
-            });
-
-            textArea.on('dblclick', function() {
-                scope.saved = false;
+            })
+            .on('dblclick', function() {
+                scope.user.tasks[element.attr("data-index")].saved = false;
                 textArea.removeClass("done");
                 checkbox.prop("checked", false);
             });
@@ -77,26 +74,42 @@ app.directive("toDoItem", function() {
             var checkbox = $(element).find(".checkTask");
             checkbox.on('click', function() {
                 var checked = checkbox.is(":checked");
+                var i = element.attr("data-index");
 
                 if (checked) {
                     textArea.addClass("done");
+                    scope.user.tasks[i].done = true;
+                    scope.save();
                 }
                 else {
                     textArea.removeClass("done");
+                    scope.user.tasks[i].done = false;
+                    scope.save();
                 }
             });
 
             var saveButton = $(element).find(".saveTask");
             saveButton.on('click', function() {
-                scope.saved = true;
-                scope.changeAddNew(false);
-                scope.updateTaskCount();
+                var task = { description: textArea.val(), done: false, saved: true };
+
+                if (element.attr("id") == "newTask" )
+                {
+                    scope.user.tasks.push(task);
+                    textArea.val("");
+                    scope.save();
+                }
+                else if (element.attr("data-index"))
+                {
+                    scope.user.tasks.splice(element.attr("data-index"), 1, task);
+                    scope.save();
+                }
             });
 
             var deleteButton = $(element).find(".deleteTask");
             deleteButton.on('click', function() {
+                scope.user.tasks.splice(element.attr("data-index"), 1);
+                scope.save();
                 element.remove();
-                scope.updateTaskCount();
             });
         }
     }

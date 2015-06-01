@@ -1,6 +1,6 @@
 <div class='task'>
-    <input type='checkbox' class='checkTask' ng-show='saved'>
-    <textarea class='taskDescription' rows='1' placeholder='Task description' ng-readonly='saved' autofocus='true'></textarea>
-    <a class='glyphicon glyphicon-ok-circle saveTask' ng-show='!saved'></a>
-    <a class='glyphicon glyphicon-remove deleteTask' ng-show='saved'></a>
+    <input type='checkbox' class='checkTask' ng-show='task.saved'>
+    <textarea class='taskDescription' rows='1' placeholder='Task description' ng-readonly='saved'>{{ task.description }}</textarea>
+    <a class='glyphicon glyphicon-ok-circle saveTask' ng-show='!task.saved'></a>
+    <a class='glyphicon glyphicon-remove deleteTask' ng-show='task.saved'></a>
 <div>

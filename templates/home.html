@@ -22,6 +22,7 @@
     <a class="glyphicon glyphicon-list-alt" id="showToDo" ng-click="showToDoList = !showToDoList"></a>
     <div id="toDo" ng-controller="ToDoController" ng-show="showToDoList">
         <h4>{{ taskCount }} THINGS TO DO:</h4>
-        <a class="toDoList glyphicon glyphicon-plus" id="addNew" ng-click="addTask()" ng-hide="hideAddNew"> Add a task</a>
+        <to-do-item data-index="{{ user.tasks.indexOf(task) }}" ng-repeat="task in user.tasks"></to-do-item>
+        <to-do-item id="newTask"></to-do-item>
     </div> 
 </div>
