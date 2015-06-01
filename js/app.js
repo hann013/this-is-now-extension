@@ -215,7 +215,7 @@ app.provider("WeatherForecast", function() {
 
 // Set Wunderground API key - withheld from GitHub
 app.config(function(WeatherForecastProvider) {
-    WeatherForecastProvider.setApiKey("b3b713e2174b5880");
+    WeatherForecastProvider.setApiKey("");
 });
 
 // Service to save user settings
