@@ -19,20 +19,27 @@
 #time h1
 {
     font-size: 7em;
-    text-shadow: 0 0 0.2em black, 0 0 0.2em #87F;
+    text-shadow: 0 0 0.2em black, 0 0 0.2em #87F, 0 0 0.2em #87F;
     transition: text-shadow 1s;
 }
 
 #time h2
 {
     font-size: 3em;
-    text-shadow: 0 0 0.2em black, 0 0 0.2em #4775FF;
+    text-shadow: 0 0 0.2em black, 0 0 0.2em #4775FF, 0 0 0.5em #4775FF;
     transition: text-shadow 1s;
 }
 
-#time h1:hover, #time h2:hover
+#time p
 {
-    text-shadow: 0 0 0.2em black, 0 0 0.2em #2303FF;  
+    text-shadow: 0 0 0.2em black, 0 0 0.2em #87F, 0 0 0.2em #87F;
+    transition: text-shadow 1s;
+    margin-top: 5%;
+}
+
+#time h1:hover, #time h2:hover, #time p:hover
+{
+    text-shadow: 0 0 0.2em black, 0 0 0.2em #2303FF, 0 0 0.2em #2303FF;  
 }
 
 /* Weather */
@@ -101,6 +108,7 @@
 /* To-do list */
 #toDo
 {
+    display: inline-block;
     position: absolute;
     width: 23%;
     height: 50%;
