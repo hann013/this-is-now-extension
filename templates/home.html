@@ -1,7 +1,8 @@
 <div id="background" ng-style="{ 'background-image': 'url({{ user.backgroundImage }})' }">
     <div id="time" ng-controller="ClockController">
-        <h1>{{ clock | date : "hh mm ss a" }}</h1>
-        <h2>{{ clock | date : "MM dd yyyy" }}</h2>
+        <h1 class="time">{{ clock | date : "hh mm ss a" }}</h1>
+        <h2 class="time">{{ clock | date : "MM dd yyyy" }}</h2>
+        <p ng-show="showThisIsNow">This is now. What are you doing?</p>
     </div>
     <div id="weather" ng-controller="WeatherController">
         <p id="userLocation" ng-show="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
@@ -24,5 +25,6 @@
         <h4>{{ taskCount }} THINGS TO DO:</h4>
         <to-do-item data-index="{{ user.tasks.indexOf(task) }}" ng-repeat="task in user.tasks"></to-do-item>
         <to-do-item id="newTask"></to-do-item>
-    </div> 
+    </div>
+    <div id="water" ng-controller="WaterController"></div> 
 </div>

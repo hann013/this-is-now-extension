@@ -4,6 +4,7 @@
     "description": "A productive homepage",
     "version": "0.1",
     "permissions": [
+        "notifications",
         "geolocation",
         "http://api.wunderground.com/api/",
         "http://autocomplete.wunderground.com/api"

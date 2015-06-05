@@ -7,6 +7,8 @@ app.controller("MainController", function($scope, UserService) {
 
 // Display and update the time and date
 app.controller("ClockController", function($scope) {
+    $scope.showThisIsNow = false;
+
     // Function that updates clock time
     function updateClock() {
         $scope.clock = new Date();
@@ -19,6 +21,38 @@ app.controller("ClockController", function($scope) {
     var timer = setInterval(function() {
         $scope.$apply(updateClock);
     }, 1000);
+
+    function toggleThisIsNow() {
+        $scope.showThisIsNow = !$scope.showThisIsNow;
+    }
+
+    $(".time").on("mouseover", toggleThisIsNow).on("mouseleave", toggleThisIsNow);
+});
+
+app.controller("WaterController", function($scope, UserService) {
+    if (UserService.user.waterNotifications)
+    {
+        var notifs = setInterval(createNotification, 2000);
+    }
+
+    function createNotification() {
+        var userProgress = 0;
+        var opt = {
+            type: "progress",
+            title: "Remember to drink water",
+            message: "Remember to take a sip!",
+            iconUrl: "/img/glass-of-water.jpg",
+            progress: userProgress,
+            buttons: [{
+                title: "Took a sip!"
+            }]
+        };
+        chrome.notifications.create("waterNotification", opt, function(){
+            chrome.notifications.onButtonClicked.addListener(function() {
+                userProgress += 10;
+            });
+        });
+    }
 });
 
 app.controller("ToDoController", function($scope, $compile, UserService) {
@@ -215,13 +249,15 @@ app.provider("WeatherForecast", function() {
 
 // Set Wunderground API key - withheld from GitHub
 app.config(function(WeatherForecastProvider) {
-    WeatherForecastProvider.setApiKey("");
+    WeatherForecastProvider.setApiKey("b3b713e2174b5880");
 });
 
 // Service to save user settings
 app.factory('UserService', function(){ 
     var defaults = {
-        location: "Determine automatically"
+        location: "Determine automatically",
+        waterNotifications: true,
+        tasks: []
     };
 
     var service = {
