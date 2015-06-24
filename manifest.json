@@ -6,6 +6,7 @@
     "permissions": [
         "notifications",
         "geolocation",
+        "filesystem",
         "http://api.wunderground.com/api/",
         "http://autocomplete.wunderground.com/api"
     ],
