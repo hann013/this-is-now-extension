@@ -1,17 +1,48 @@
 <div class="container">
     <h1>Settings</h1>
     <form ng-submit="save()">
-      Location:
-      <input type="text"
-              ng-model="user.location"
-              auto-fill="getCityResults"
-              autocomplete="off"
-              placeholder="Enter a location" />
-      
-      Background image:
-      <input type="text"
-             ng-model="user.backgroundImage"
-             placeholder="Enter an image link" />
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text"
+               class="form-control"
+               ng-model="user.location"
+               auto-fill="getCityResults"
+               autocomplete="off"
+               placeholder="Enter a location" />
+      </div>
+      <div class="form-group">
+        <label>Background image</label>
+        <input type="file" class="form-control" id="file"
+               ng-model="user.localBackgroundImage" />
+        <input type="text"
+               class="form-control"
+               ng-model="user.backgroundImage"
+               placeholder="Enter an image link" />
+      </div>
+
+      <h3>Water Intake Notifications</h3>
+      <div class="checkbox">
+        <label><input type="checkbox" ng-model="user.waterNotifications.On" />Notifications <span ng-show="user.waterNotifications.On">on</span>
+                                                                                            <span ng-hide="user.waterNotifications.On">off</span>
+        </label>
+      </div>
+      <div class="form-group" ng-show="user.waterNotifications.On">
+        <label>Frequency</label>
+        <select class="form-control" ng-model="user.waterNotifications.Frequency">
+          <option value="900000">15 minutes</option>
+          <option value="1800000">30 minutes</option>
+          <option value="2700000">45 minutes</option>
+          <option value="3600000">1 hour</option>
+          <option value="7200000">2 hours</option>
+        </select>
+      </div>
+      <div class="form-group" ng-show="user.waterNotifications.On">
+        <label>Daily goal (mL)</label>
+        <input type="number"
+               class="form-control"
+               ng-model="user.waterNotifications.Goal">
+        <p ng-show="user.waterNotifications.Goal">= around {{ user.waterNotifications.Goal / 15 | number:0 }} sips!</p>
+      </div>
       <input class="btn btn-primary" 
             type="submit" value="Save" />
     </form>
