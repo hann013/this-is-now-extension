@@ -29,32 +29,52 @@ app.controller("ClockController", function($scope) {
     $(".time").on("mouseover", toggleThisIsNow).on("mouseleave", toggleThisIsNow);
 });
 
+// Displays reminder notifications for water intake 
 app.controller("WaterController", function($scope, UserService) {
-    if (UserService.user.waterNotifications)
+    var settings = UserService.user.waterNotifications;
+    if (settings.On)
     {
-        var notifs = setInterval(createNotification, 2000);
-    }
+        var sips = 0;
+        var sipsGoal = Math.round(settings.Goal / 15);
+        var notifs = setInterval(createNotification, settings.Frequency);
 
-    function createNotification() {
-        var userProgress = 0;
-        var opt = {
-            type: "progress",
-            title: "Remember to drink water",
-            message: "Remember to take a sip!",
-            iconUrl: "/img/glass-of-water.jpg",
-            progress: userProgress,
-            buttons: [{
-                title: "Took a sip!"
-            }]
-        };
-        chrome.notifications.create("waterNotification", opt, function(){
-            chrome.notifications.onButtonClicked.addListener(function() {
-                userProgress += 10;
+        function createNotification() {
+            chrome.notifications.getAll(function(notifs){
+                for (id in notifs) {
+                    chrome.notifications.clear(id);
+                }
             });
+
+            var id = "waterNotification" + new Date().getTime();
+            var opt = {
+                type: "progress",
+                title: "Remember to drink water",
+                message: "Remember to take a sip!",
+                iconUrl: "/img/glass-of-water.jpg",
+                progress: Math.round((sips / sipsGoal) * 100),
+                buttons: [{
+                    title: "I took a sip!"
+                }]
+            };
+            chrome.notifications.create(id, opt);
+        }
+
+        chrome.notifications.onButtonClicked.addListener(function() {
+            sips += 1;
+            if (sips / sipsGoal >= 1) {
+                clearInterval(notifs);
+                chrome.notifications.create({
+                    type: "basic",
+                    title: "Goal reached",
+                    message: "You reached your daily water intake goal!",
+                    iconUrl: "/img/glass-of-water.jpg"
+                });
+            }
         });
     }
 });
 
+// Handles to-do list related activities
 app.controller("ToDoController", function($scope, $compile, UserService) {
     $scope.user.tasks = UserService.user.tasks;
     $scope.taskCount = $scope.user.tasks.length;
@@ -79,6 +99,7 @@ app.controller("ToDoController", function($scope, $compile, UserService) {
     });
 });
 
+// Item in the to-do list
 app.directive("toDoItem", function() {
     return {
         restrict: "E",
@@ -249,14 +270,14 @@ app.provider("WeatherForecast", function() {
 
 // Set Wunderground API key - withheld from GitHub
 app.config(function(WeatherForecastProvider) {
-    WeatherForecastProvider.setApiKey("b3b713e2174b5880");
+    WeatherForecastProvider.setApiKey("");
 });
 
 // Service to save user settings
 app.factory('UserService', function(){ 
     var defaults = {
         location: "Determine automatically",
-        waterNotifications: true,
+        waterNotifications: { On: true, Frequency: 1800000, Goal: 100 },
         tasks: []
     };
 
@@ -266,7 +287,7 @@ app.factory('UserService', function(){
             localStorage.thisIsNow = angular.toJson(service.user);
         },
         restore: function() {
-            service.user = angular.fromJson(localStorage.thisIsNow) || defaults
+            service.user = angular.fromJson(localStorage.thisIsNow) || defaults;
         },
     }
 
@@ -281,7 +302,14 @@ app.controller("SettingsController", function($scope, UserService, WeatherForeca
     $scope.getCityResults = WeatherForecast.getCityDetails;
 
     $scope.save = function() {
-        UserService.save();
+        if ($("#file")[0].files[0] && $("#file")[0].files[0].type.indexOf("image") == -1) {
+            $("#file").val("");
+            alert("Please select a valid image file.");
+        }
+        else {
+            //chrome.fileSystem.getDisplayPath($("#file")[0].files[0], function(path) { console.log(path); });
+            UserService.save();
+        } 
     };
 });
 
