@@ -1,4 +1,4 @@
-var app = angular.module("ThisIsNowApp", ['ngRoute']);
+var app = angular.module("ThisIsNowApp", ['ngRoute', 'ui.bootstrap']);
 
 app.controller("MainController", function($scope, UserService) {
     $scope.user = UserService.user;
@@ -22,22 +22,24 @@ app.controller("ClockController", function($scope) {
         $scope.$apply(updateClock);
     }, 1000);
 
+    // Show "this is now" message when cursor hovers over date/time
     function toggleThisIsNow() {
         $scope.showThisIsNow = !$scope.showThisIsNow;
     }
-
     $(".time").on("mouseover", toggleThisIsNow).on("mouseleave", toggleThisIsNow);
 });
 
 // Displays reminder notifications for water intake 
 app.controller("WaterController", function($scope, UserService) {
     var settings = UserService.user.waterNotifications;
+
     if (settings.On)
     {
         var sips = 0;
         var sipsGoal = Math.round(settings.Goal / 15);
         var notifs = setInterval(createNotification, settings.Frequency);
 
+        // Generate notifications based on selected frequency
         function createNotification() {
             chrome.notifications.getAll(function(notifs){
                 for (id in notifs) {
@@ -59,6 +61,7 @@ app.controller("WaterController", function($scope, UserService) {
             chrome.notifications.create(id, opt);
         }
 
+        // Alert if water goal is reached for the day
         chrome.notifications.onButtonClicked.addListener(function() {
             sips += 1;
             if (sips / sipsGoal >= 1) {
@@ -79,20 +82,24 @@ app.controller("ToDoController", function($scope, $compile, UserService) {
     $scope.user.tasks = UserService.user.tasks;
     $scope.taskCount = $scope.user.tasks.length;
 
+    // Update task count
     $scope.$watch(function(scope) { return scope.user.tasks.length; },
         function(updatedValue) { $scope.taskCount = updatedValue; } 
     );
 
+    // Create a new task
     $scope.addTask = function() {
         var newTask = $(document.createElement("to-do-item"));
         newTask.insertBefore("#addNew");
         $compile(newTask)($scope);
     }
 
+    // Save tasks to local storage
     $scope.save = function() {
         UserService.save();
     }
 
+    // Drag to sort tasks - IN-PROGRESS
     $("#toDo").sortable({ 
         cursor: "move",
         items: ">> .task", 
@@ -106,26 +113,35 @@ app.directive("toDoItem", function() {
         scope: true,
         templateUrl: "/templates/to-do-item.html",
         link: function(scope, element, attrs) {
-            element.on("mouseover", function() {
-                deleteButton.css("opacity", "1");
-            })
-            .on("mouseleave", function() {
-                deleteButton.css("opacity", "0");
-            });
-
             var textArea = $(element).find(".taskDescription");
             textArea.keydown(function(e) {
+                // Hit "enter" to save task
                 if (e.keyCode == 13) {
                     e.preventDefault();
-                    saveButton.click();
+                    
+                    var task = { description: textArea.val(), done: false, saved: true };
+
+                    if (element.attr("id") == "newTask" )
+                    {
+                        scope.user.tasks.push(task);
+                        textArea.val("");
+                        scope.save();
+                    }
+                    else if (element.attr("data-index"))
+                    {
+                        scope.user.tasks.splice(element.attr("data-index"), 1, task);
+                        scope.save();
+                    }
                 }
             })
+            // Edit saved task by double-clicking
             .on('dblclick', function() {
                 scope.user.tasks[element.attr("data-index")].saved = false;
                 textArea.removeClass("done");
                 checkbox.prop("checked", false);
             });
 
+            // Track whether or not task is checked off
             var checkbox = $(element).find(".checkTask");
             checkbox.on('click', function() {
                 var checked = checkbox.is(":checked");
@@ -134,54 +150,48 @@ app.directive("toDoItem", function() {
                 if (checked) {
                     textArea.addClass("done");
                     scope.user.tasks[i].done = true;
-                    scope.save();
                 }
                 else {
                     textArea.removeClass("done");
                     scope.user.tasks[i].done = false;
-                    scope.save();
                 }
+                scope.save();
             });
 
-            var saveButton = $(element).find(".saveTask");
-            saveButton.on('click', function() {
-                var task = { description: textArea.val(), done: false, saved: true };
-
-                if (element.attr("id") == "newTask" )
-                {
-                    scope.user.tasks.push(task);
-                    textArea.val("");
-                    scope.save();
-                }
-                else if (element.attr("data-index"))
-                {
-                    scope.user.tasks.splice(element.attr("data-index"), 1, task);
-                    scope.save();
-                }
-            });
-
+            // Delete tasks
             var deleteButton = $(element).find(".deleteTask");
             deleteButton.on('click', function() {
                 scope.user.tasks.splice(element.attr("data-index"), 1);
                 scope.save();
                 element.remove();
             });
+            // Only show button to delete task upon hover
+            element.on("mouseover", function() {
+                deleteButton.css("opacity", "1");
+            })
+            .on("mouseleave", function() {
+                deleteButton.css("opacity", "0");
+            });
         }
     }
 });
 
 // Display the current weather and 3-day forecast
-app.controller("WeatherController", function($scope, WeatherForecast) {
+app.controller("WeatherController", function($scope, WeatherForecast, UserService) {
     $scope.showForecast = false;
     $scope.weather = {};
 
-    navigator.geolocation.getCurrentPosition(setPosition, errorHandler);
+    navigator.geolocation.getCurrentPosition(setPosition);
 
+    // Utilize saved location or auto-determined location to get weather forecast
     function setPosition(position) {
-        var latitude = position.coords.latitude;
-        var longitude = position.coords.longitude;
-        var userLocation = latitude + "," + longitude;
-
+        var userLocation;
+        if (UserService.user.location) {
+            userLocation = UserService.user.location;
+        }
+        else {
+            userLocation = position.coords.latitude + "," + position.coords.longitude;
+        }
         WeatherForecast.getWeatherForecast(userLocation)
         .then(function(data){
             $scope.userLocation = data[0];
@@ -189,11 +199,8 @@ app.controller("WeatherController", function($scope, WeatherForecast) {
             $scope.weather.forecast = data[1];
         });
     }
-
-    function errorHandler(err) {
-        console.log(err);
-    }
     
+    // Display "show forecast" tool-tip prompt on hover
     $scope.showWeatherHover = function() {
         var today = document.getElementById("today");
         var weatherHover = document.getElementById("showWeather");
@@ -275,16 +282,26 @@ app.config(function(WeatherForecastProvider) {
 
 // Service to save user settings
 app.factory('UserService', function(){ 
+    // Default user settings 
     var defaults = {
-        location: "Determine automatically",
-        waterNotifications: { On: true, Frequency: 1800000, Goal: 100 },
+        location: "",
+        waterNotifications: { On: true, Frequency: 90000, Goal: 1500 },
         tasks: []
     };
 
+    // Save and restore user settings to/from Chrome local storage
     var service = {
         user: {},
         save: function() {
-            localStorage.thisIsNow = angular.toJson(service.user);
+            localStorage.thisIsNow = angular.toJson(service.user); 
+
+            var localImageInput = document.getElementById("file").files;
+
+            if (localImageInput.length) {
+                console.log(localImageInput);
+                var reader = new FileReader();
+                reader.readAsDataURL(localImageInput[0]);
+            }
         },
         restore: function() {
             service.user = angular.fromJson(localStorage.thisIsNow) || defaults;
@@ -296,12 +313,21 @@ app.factory('UserService', function(){
 });
 
 // Settings page
-app.controller("SettingsController", function($scope, UserService, WeatherForecast) {
+app.controller("SettingsController", function($scope, UserService, WeatherForecast, $http) {
     $scope.user = UserService.user;
 
     $scope.getCityResults = WeatherForecast.getCityDetails;
 
+    $scope.notificationFrequencies = [
+        { value: 90000, name: "15 minutes" },
+        { value: 180000, name: "30 minutes" },
+        { value: 270000, name: "45 minutes" },
+        { value: 360000, name: "1 hour" },
+        { value: 720000, name: "2 hours" }
+    ];
+
     $scope.save = function() {
+        // Local file selection - IN PROGRESS
         if ($("#file")[0].files[0] && $("#file")[0].files[0].type.indexOf("image") == -1) {
             $("#file").val("");
             alert("Please select a valid image file.");
@@ -311,62 +337,6 @@ app.controller("SettingsController", function($scope, UserService, WeatherForeca
             UserService.save();
         } 
     };
-});
-
-app.directive("autoFill", function($timeout) {
-    return {
-        restrict: "EA",
-        scope: {
-            autoFill: "&",
-            ngModel: "="
-        },
-        compile: function(inputElement, inputAttrs) {
-            // compilation function - necessary for creating new element
-            var autoFillElement = angular.element('<div class="typeahead">' +
-                                          '<input type="text" autocomplete="off" />' +
-                                          '<ul id="autolist" ng-show="reslist">' +
-                                            '<li ng-repeat="res in reslist" ' +
-                                              '>{{res.name}}</li>' +
-                                          '</ul>' +
-                                          '</div>');
-            var input = autoFillElement.find("input");
-            input.attr("type", inputAttrs.type);
-            input.attr("ng-model", inputAttrs.ngModel);
-            inputElement.replaceWith(autoFillElement);            
-
-            return function(scope, ele, attrs, ctrl) {
-                // link function
-                  var minKeyCount = attrs.minKeyCount || 3,
-                      timer,
-                      input = ele.find('input');
-
-                  input.bind('keyup', function(e) {
-                    val = ele.val();
-                    if (val.length < minKeyCount) {
-                      if (timer) $timeout.cancel(timer);
-                      scope.reslist = null;
-                      return;
-                    } else {
-                      if (timer) $timeout.cancel(timer);
-                      timer = $timeout(function() {
-                        scope.autoFill()(val)
-                        .then(function(data) {
-                          if (data && data.length > 0) {
-                            scope.reslist = data;
-                            scope.ngModel = data[0].zmw;
-                          }
-                        });
-                      }, 300);
-                    }
-                  });
-                  // Hide the reslist on blur
-                  input.bind('blur', function(e) {
-                    scope.reslist = null;
-                    scope.$digest();
-                  });
-            }
-        }
-    }
 });
 
 // Routing to multiple screens
