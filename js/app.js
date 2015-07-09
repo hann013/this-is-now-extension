@@ -3,6 +3,16 @@ var app = angular.module("ThisIsNowApp", ['ngRoute', 'ui.bootstrap']);
 app.controller("MainController", function($scope, UserService) {
     $scope.user = UserService.user;
     $scope.showToDoList = true;
+    $scope.showWaterIntake = true;
+
+    if (UserService.user.background.Type == "web") {
+        console.log("here");
+        $scope.backgroundImage = UserService.user.background.WebUrl;
+        console.log($scope.backgroundImage);
+    }
+    else {
+        $scope.backgroundImage = UserService.user.background.LocalUrl;
+    }
 })
 
 // Display and update the time and date
@@ -35,8 +45,8 @@ app.controller("WaterController", function($scope, UserService) {
 
     if (settings.On)
     {
-        var sips = 0;
-        var sipsGoal = Math.round(settings.Goal / 15);
+        $scope.sips = settings.CurrentSips;
+        $scope.sipsGoal = Math.round(settings.Goal / 15);
         var notifs = setInterval(createNotification, settings.Frequency);
 
         // Generate notifications based on selected frequency
@@ -53,7 +63,7 @@ app.controller("WaterController", function($scope, UserService) {
                 title: "Remember to drink water",
                 message: "Remember to take a sip!",
                 iconUrl: "/img/glass-of-water.jpg",
-                progress: Math.round((sips / sipsGoal) * 100),
+                progress: Math.round(($scope.sips / $scope.sipsGoal) * 100),
                 buttons: [{
                     title: "I took a sip!"
                 }]
@@ -63,8 +73,8 @@ app.controller("WaterController", function($scope, UserService) {
 
         // Alert if water goal is reached for the day
         chrome.notifications.onButtonClicked.addListener(function() {
-            sips += 1;
-            if (sips / sipsGoal >= 1) {
+            $scope.sips += 1;
+            if ($scope.sips / $scope.sipsGoal >= 1) {
                 clearInterval(notifs);
                 chrome.notifications.create({
                     type: "basic",
@@ -74,6 +84,9 @@ app.controller("WaterController", function($scope, UserService) {
                 });
             }
         });
+    }
+    else {
+        $("#water").hide();
     }
 });
 
@@ -169,7 +182,7 @@ app.directive("toDoItem", function() {
             element.on("mouseover", function() {
                 deleteButton.css("opacity", "1");
             })
-            .on("mouseleave", function() {
+            .on("mouseout", function() {
                 deleteButton.css("opacity", "0");
             });
         }
@@ -263,7 +276,12 @@ app.provider("WeatherForecast", function() {
                     url: "http://autocomplete.wunderground.com/aq?query=" + query
                 })
                 .success(function(data){
-                    d.resolve(data.RESULTS);
+                    if (data.RESULTS.length > 6) {
+                        d.resolve(data.RESULTS.slice(0,6));
+                    }
+                    else {
+                        d.resolve(data.RESULTS);
+                    }
                 })
                 .error(function(err){
                     d.reject(err);
@@ -285,8 +303,10 @@ app.factory('UserService', function(){
     // Default user settings 
     var defaults = {
         location: "",
-        waterNotifications: { On: true, Frequency: 90000, Goal: 1500 },
-        tasks: []
+        background: { Type: "web", LocalUrl: "", WebUrl: "" },
+        waterNotifications: { On: true, Frequency: 900000, Goal: 1500, CurrentSips: 0 },
+        tasks: [],
+        tasksNotifications: { On: true, Frequency: 900000, ShowAll: true }
     };
 
     // Save and restore user settings to/from Chrome local storage
@@ -319,11 +339,16 @@ app.controller("SettingsController", function($scope, UserService, WeatherForeca
     $scope.getCityResults = WeatherForecast.getCityDetails;
 
     $scope.notificationFrequencies = [
-        { value: 90000, name: "15 minutes" },
-        { value: 180000, name: "30 minutes" },
-        { value: 270000, name: "45 minutes" },
-        { value: 360000, name: "1 hour" },
-        { value: 720000, name: "2 hours" }
+        { value: 900000, name: "15 minutes" },
+        { value: 1800000, name: "30 minutes" },
+        { value: 2700000, name: "45 minutes" },
+        { value: 3600000, name: "1 hour" },
+        { value: 7200000, name: "2 hours" }
+    ];
+
+    $scope.showTasks = [
+        { value: true, name: "All tasks" },
+        { value: false, name: "Start from top of list" }
     ];
 
     $scope.save = function() {

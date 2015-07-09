@@ -1,14 +1,14 @@
 <div id="settings">
     <a href="#/settings" class="glyphicon glyphicon-cog"></a>
 </div>
-<div id="background" ng-style="{ 'background-image': 'url({{ user.backgroundImage }})' }">
+<div id="background" ng-style="{ 'background-image': 'url({{ backgroundImage }})' }">
     <div id="time" ng-controller="ClockController">
         <h1 class="time">{{ clock | date : "hh mm ss a" }}</h1>
         <h2 class="time">{{ clock | date : "MM dd yyyy" }}</h2>
         <p ng-show="showThisIsNow">This is now. What are you up to?</p>
     </div>
-    <div id="weather" ng-controller="WeatherController">
-        <p id="userLocation" ng-show="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
+    <div id="weather" ng-controller="WeatherController" ng-show="userLocation">
+        <p id="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
         <div class="weather-day" id="today" ng-mouseover="showWeatherHover()" ng-click="showForecast = !showForecast" ng-show="weather.today">
             <img class="{{ weather.today.icon }}" ng-src="{{ weather.today.icon_url }}">
             <p class="weekday" ng-show="showForecast">Today<p>
@@ -29,5 +29,11 @@
         <to-do-item data-index="{{ user.tasks.indexOf(task) }}" ng-repeat="task in user.tasks"></to-do-item>
         <to-do-item id="newTask"></to-do-item>
     </div>
-    <div id="water" ng-controller="WaterController"></div> 
+    <a class="glyphicon glyphicon-tint" id="showWater" ng-click="showWaterIntake = !showWaterIntake"></a>
+    <div class="col-md-3" id="water" ng-controller="WaterController" ng-show="showWaterIntake">
+        <h4>Daily Water Intake</h4>
+        <progressbar class="progress-striped" max="sipsGoal" value="sips">
+            <span style="color:black; white-space:nowrap;">{{ sips }} / {{ sipsGoal }} sips</span>
+        </progressbar>
+    </div> 
 </div>
