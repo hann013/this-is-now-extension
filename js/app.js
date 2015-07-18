@@ -2,17 +2,10 @@ var app = angular.module("ThisIsNowApp", ['ngRoute', 'ui.bootstrap']);
 
 app.controller("MainController", function($scope, UserService) {
     $scope.user = UserService.user;
-    $scope.showToDoList = true;
+    $scope.showToDoList = true; 
     $scope.showWaterIntake = true;
 
-    if (UserService.user.background.Type == "web") {
-        console.log("here");
-        $scope.backgroundImage = UserService.user.background.WebUrl;
-        console.log($scope.backgroundImage);
-    }
-    else {
-        $scope.backgroundImage = UserService.user.background.LocalUrl;
-    }
+     $scope.backgroundImage = UserService.user.background.Type == "web" ? UserService.user.background.WebUrl : UserService.user.background.LocalFileName;
 })
 
 // Display and update the time and date
@@ -36,6 +29,7 @@ app.controller("ClockController", function($scope) {
     function toggleThisIsNow() {
         $scope.showThisIsNow = !$scope.showThisIsNow;
     }
+
     $(".time").on("mouseover", toggleThisIsNow).on("mouseleave", toggleThisIsNow);
 });
 
@@ -73,7 +67,8 @@ app.controller("WaterController", function($scope, UserService) {
 
         // Alert if water goal is reached for the day
         chrome.notifications.onButtonClicked.addListener(function() {
-            $scope.sips += 1;
+            settings.CurrentSips, $scope.sips += 1;
+            UserService.save();
             if ($scope.sips / $scope.sipsGoal >= 1) {
                 clearInterval(notifs);
                 chrome.notifications.create({
@@ -107,11 +102,6 @@ app.controller("ToDoController", function($scope, $compile, UserService) {
         $compile(newTask)($scope);
     }
 
-    // Save tasks to local storage
-    $scope.save = function() {
-        UserService.save();
-    }
-
     // Drag to sort tasks - IN-PROGRESS
     $("#toDo").sortable({ 
         cursor: "move",
@@ -120,7 +110,7 @@ app.controller("ToDoController", function($scope, $compile, UserService) {
 });
 
 // Item in the to-do list
-app.directive("toDoItem", function() {
+app.directive("toDoItem", function(UserService) {
     return {
         restrict: "E",
         scope: true,
@@ -138,12 +128,12 @@ app.directive("toDoItem", function() {
                     {
                         scope.user.tasks.push(task);
                         textArea.val("");
-                        scope.save();
+                        UserService.save();
                     }
                     else if (element.attr("data-index"))
                     {
                         scope.user.tasks.splice(element.attr("data-index"), 1, task);
-                        scope.save();
+                        UserService.save();
                     }
                 }
             })
@@ -168,14 +158,14 @@ app.directive("toDoItem", function() {
                     textArea.removeClass("done");
                     scope.user.tasks[i].done = false;
                 }
-                scope.save();
+                UserService.save();
             });
 
             // Delete tasks
             var deleteButton = $(element).find(".deleteTask");
             deleteButton.on('click', function() {
                 scope.user.tasks.splice(element.attr("data-index"), 1);
-                scope.save();
+                UserService.save();
                 element.remove();
             });
             // Only show button to delete task upon hover
@@ -207,7 +197,7 @@ app.controller("WeatherController", function($scope, WeatherForecast, UserServic
         }
         WeatherForecast.getWeatherForecast(userLocation)
         .then(function(data){
-            $scope.userLocation = data[0];
+            $scope.userLocation = data[0].state ? data[0].city + ", " + data[0].state : userLocation;
             $scope.weather.today = data[1].forecastday[0];
             $scope.weather.forecast = data[1];
         });
@@ -215,7 +205,6 @@ app.controller("WeatherController", function($scope, WeatherForecast, UserServic
     
     // Display "show forecast" tool-tip prompt on hover
     $scope.showWeatherHover = function() {
-        var today = document.getElementById("today");
         var weatherHover = document.getElementById("showWeather");
 
         weatherHover.style.opacity = 0.75; 
@@ -227,7 +216,7 @@ app.controller("WeatherController", function($scope, WeatherForecast, UserServic
             weatherHover.innerHTML = "Show forecast"; 
         }
 
-        today.addEventListener("mouseleave", function() {
+        $("#today").on("mouseleave", function() {
             weatherHover.style.opacity = 0;
         });
     };
@@ -303,7 +292,7 @@ app.factory('UserService', function(){
     // Default user settings 
     var defaults = {
         location: "",
-        background: { Type: "web", LocalUrl: "", WebUrl: "" },
+        background: { Type: "web", LocalFileName: "", WebUrl: "" },
         waterNotifications: { On: true, Frequency: 900000, Goal: 1500, CurrentSips: 0 },
         tasks: [],
         tasksNotifications: { On: true, Frequency: 900000, ShowAll: true }
@@ -313,15 +302,54 @@ app.factory('UserService', function(){
     var service = {
         user: {},
         save: function() {
-            localStorage.thisIsNow = angular.toJson(service.user); 
+            if (document.getElementById("localImage")) {
+                var image = document.getElementById("localImage").files[0];
 
-            var localImageInput = document.getElementById("file").files;
+                if (service.user.background.Type == "local" && image) {
+                    window.webkitRequestFileSystem(window.TEMPORARY, 1024*1024, saveImage, errorHandler);                
+                }
 
-            if (localImageInput.length) {
-                console.log(localImageInput);
-                var reader = new FileReader();
-                reader.readAsDataURL(localImageInput[0]);
+                function saveImage(fs) {
+                    // Read saved files
+                    var dirReader = fs.root.createReader();
+                    var previousImages = [];
+
+                    // Look up all files stored in the filesystem and remove them
+                    function readEntries() {
+                        dirReader.readEntries (function(results) {
+                            if (!results.length) {
+                                for(i in previousImages) {
+                                    previousImages[i].remove(function(){ 
+                                    }, errorHandler);
+                                }
+                            } else {
+                                for (i in results) {
+                                    previousImages.push(results[i]);
+                                }
+                                readEntries();
+                            }
+                        }, errorHandler);
+                    };
+
+                    readEntries(); // Start reading dirs.
+
+                    // Save uploaded image file
+                    fs.root.getFile(image.name, {create: true}, function(fileEntry) {
+                        fileEntry.createWriter(function(fileWriter) {
+                            fileWriter.write(image);
+                            console.log("uploaded " + fileEntry.name);  
+                            service.user.background.LocalFileName = fileEntry.toURL();
+                            localStorage.thisIsNow = angular.toJson(service.user); 
+                        }, errorHandler);
+                    }, errorHandler);             
+                }
+
+                function errorHandler(e) {
+                    console.log(e);
+                }                
             }
+            
+            localStorage.thisIsNow = angular.toJson(service.user);                                 
         },
         restore: function() {
             service.user = angular.fromJson(localStorage.thisIsNow) || defaults;
@@ -352,15 +380,7 @@ app.controller("SettingsController", function($scope, UserService, WeatherForeca
     ];
 
     $scope.save = function() {
-        // Local file selection - IN PROGRESS
-        if ($("#file")[0].files[0] && $("#file")[0].files[0].type.indexOf("image") == -1) {
-            $("#file").val("");
-            alert("Please select a valid image file.");
-        }
-        else {
-            //chrome.fileSystem.getDisplayPath($("#file")[0].files[0], function(path) { console.log(path); });
-            UserService.save();
-        } 
+        UserService.save();
     };
 });
 
