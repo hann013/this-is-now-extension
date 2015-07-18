@@ -1,76 +1,96 @@
-<div id="settings">
-    <a href="#/" class="glyphicon glyphicon-home"></a>
-</div>
-<div class="container col-md-6 center-block">
-    <h1>Settings</h1>
-    <form ng-submit="save()">
-      <div class="form-group">
-        <h3>Weather</h3>
-        <label><span class="glyphicon glyphicon-map-marker"></span> Location</label>
-        <input type="text"
-               class="form-control"
-               ng-model="user.location"
-               typeahead="city.name for city in getCityResults($viewValue)"
-               autocomplete="off"
-               placeholder="Determine automatically" />
-      </div>
-      <div class="form-group">
-        <h3>Background Image</h3>
-        <div class="btn-group">
-          <label class="btn btn-primary" ng-model="user.background.Type" btn-radio="'local'" uncheckable><span class="glyphicon glyphicon-folder-open"></span></label>
-          <label class="btn btn-primary" ng-model="user.background.Type" btn-radio="'web'" uncheckable><span class="glyphicon glyphicon-globe"></span></label>
+<div class="background">
+  <div id="settings">
+      <a href="#/" class="glyphicon glyphicon-home"></a>
+  </div>
+  <div class="settings container col-md-6 center-block">
+      <h1><!-- <span class="glyphicon glyphicon-cog"></span>  -->settings</h1> 
+      <form ng-submit="save()">
+        <div class="form-group">
+          <h3 class="glyphicon glyphicon-cloud"><span class="heading"></span></h3>
+          <label>location</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-map-marker"></span>
+            <input type="text"
+                   class="form-control"
+                   ng-model="user.location"
+                   typeahead="city.name for city in getCityResults($viewValue)"
+                   autocomplete="off"
+                   placeholder="Determine automatically" />
+          </div>
         </div>
-      </div>
-      <div class="form-group" collapse="user.background.Type == 'web'">
-        <label><span class="glyphicon glyphicon-folder-open"></span> Local File (coming soon!)</label>
-        <input type="file" class="form-control" 
-               id="file"
-               accept="image/jpeg, image/gif, image/png, image/tiff" />
-      </div>
-      <div class="form-group" collapse="user.background.Type == 'local'">
-        <label><span class="glyphicon glyphicon-globe"></span> Web URL</label>
-        <input type="text"
-               class="form-control"
-               ng-model="user.background.WebUrl"
-               placeholder="Enter an image link" />
-      </div>
-      <div class="form-group">
-        <h3>To-Do List Notifications</h3>
-        <div class="btn-group">
-          <label class="btn btn-primary" ng-model="user.tasksNotifications.On" btn-radio="true">On</label>
-          <label class="btn btn-primary" ng-model="user.tasksNotifications.On" btn-radio="false">Off</label>
+        <div class="form-group">
+          <h3 class="glyphicon glyphicon-picture"><span class="heading"></span></h3>
+          <div class="btn-group">
+            <label class="btn btn-primary" ng-model="user.background.Type" btn-radio="'local'">local</label>
+            <label class="btn btn-primary" ng-model="user.background.Type" btn-radio="'web'">web</label>
+          </div>
         </div>
-      </div>
-      <div class="form-group" collapse="!user.tasksNotifications.On">
-        <label><span class="glyphicon glyphicon-time"></span> Frequency</label>
-        <select class="form-control" ng-model="user.tasksNotifications.Frequency" ng-options="f.value as f.name for f in notificationFrequencies">
-        </select>
-        <br>
-        <label><span class="glyphicon glyphicon-eye-open"></span> Show</label>
-        <select class="form-control" ng-model="user.tasksNotifications.ShowAll" ng-options="t.value as t.name for t in showTasks">
-        </select>
-      </div>
-      <div class="form-group">
-        <h3>Water Intake Notifications</h3>
-        <div class="btn-group">
-          <label class="btn btn-primary" ng-model="user.waterNotifications.On" btn-radio="true">On</label>
-          <label class="btn btn-primary" ng-model="user.waterNotifications.On" btn-radio="false">Off</label>
+        <div class="form-group" collapse="user.background.Type == 'web'">
+          <label>local file</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-folder-open"></span>
+            <input type="file" class="form-control" 
+                   id="localImage"
+                   accept="image/jpeg, image/gif, image/png, image/tiff" />
+          </div>
         </div>
-      </div>
-      <div class="form-group" collapse="!user.waterNotifications.On">
-        <label><span class="glyphicon glyphicon-time"></span> Frequency</label>
-        <select class="form-control" ng-model="user.waterNotifications.Frequency" ng-options="f.value as f.name for f in notificationFrequencies">
-        </select>
-        <br>
-        <label><span class="glyphicon glyphicon-tint"></span> Daily goal (mL)</label>
-        <input type="number"
-               class="form-control"
-               ng-model="user.waterNotifications.Goal">
-        <p>= around {{ user.waterNotifications.Goal / 15 | number:0 }} sips!</p>
-      </div>
-      <div class="form-group">
-        <input class="btn btn-primary" 
-               type="submit" value="Save" />
-      </div>
-    </form>
+        <div class="form-group" collapse="user.background.Type == 'local'">
+          <label>web url</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-globe"></span>
+            <input type="text"
+                   class="form-control"
+                   ng-model="user.background.WebUrl"
+                   placeholder="Enter an image link" />
+          </div>
+        </div>
+        <div class="form-group">
+          <h3 class="glyphicon glyphicon-tint"><span class="heading"></span></h3>
+          <div class="btn-group">
+            <label class="btn btn-primary" ng-model="user.waterNotifications.On" btn-radio="true">on</label>
+            <label class="btn btn-primary" ng-model="user.waterNotifications.On" btn-radio="false">off</label>
+          </div>
+        </div>
+        <div class="form-group" collapse="!user.waterNotifications.On">
+          <label>frequency</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-time"></span>
+            <select class="form-control" ng-model="user.waterNotifications.Frequency" ng-options="f.value as f.name for f in notificationFrequencies"></select>
+          </div>
+          <br>
+          <label>daily goal (mL)</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-flag"></span>
+            <input type="number"
+                   class="form-control"
+                   ng-model="user.waterNotifications.Goal">
+          </div>
+          <p>= around {{ user.waterNotifications.Goal / 15 | number:0 }} sips!</p>
+        </div>
+        <div class="form-group">
+          <h3 class="glyphicon glyphicon-list-alt"><span class="heading"></span></h3>
+          <div class="btn-group">
+            <label class="btn btn-primary" ng-model="user.tasksNotifications.On" btn-radio="true">on</label>
+            <label class="btn btn-primary" ng-model="user.tasksNotifications.On" btn-radio="false">off</label>
+          </div>
+        </div>
+        <div class="form-group" collapse="!user.tasksNotifications.On">
+          <label>frequency</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-time"></span>
+            <select class="form-control" ng-model="user.tasksNotifications.Frequency" ng-options="f.value as f.name for f in notificationFrequencies"></select>
+          </div>
+          <br>
+          <label>show</label>
+          <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-eye-open"></span>
+            <select class="form-control" ng-model="user.tasksNotifications.ShowAll" ng-options="t.value as t.name for t in showTasks"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <input class="btn btn-primary" 
+                 type="submit" value="save" />
+        </div>
+      </form>
+  </div>
 </div>
