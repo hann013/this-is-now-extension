@@ -5,10 +5,10 @@
     <div id="time" ng-controller="ClockController">
         <h1 class="time">{{ clock | date : "hh mm ss a" }}</h1>
         <h2 class="time">{{ clock | date : "MM dd yyyy" }}</h2>
-        <p ng-show="showThisIsNow">This is now. What are you up to?</p>
+        <p ng-show="showThisIsNow">this is now. what are you up to?</p>
     </div>
     <div id="weather" ng-controller="WeatherController" ng-show="userLocation">
-        <p id="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation.city }}, {{ userLocation.state }}</p>
+        <p id="userLocation"><span class="glyphicon glyphicon-map-marker"></span> {{ userLocation }}</p>
         <div class="weather-day" id="today" ng-mouseover="showWeatherHover()" ng-click="showForecast = !showForecast" ng-show="weather.today">
             <img class="{{ weather.today.icon }}" ng-src="{{ weather.today.icon_url }}">
             <p class="weekday" ng-show="showForecast">Today<p>
@@ -25,7 +25,7 @@
     </div>
     <a class="glyphicon glyphicon-list-alt" id="showToDo" ng-click="showToDoList = !showToDoList"></a>
     <div id="toDo" ng-controller="ToDoController" ng-show="showToDoList">
-        <h4>{{ taskCount }} THINGS TO DO:</h4>
+        <h4>{{ taskCount }} things to do:</h4>
         <to-do-item data-index="{{ user.tasks.indexOf(task) }}" ng-repeat="task in user.tasks"></to-do-item>
         <to-do-item id="newTask"></to-do-item>
     </div>
