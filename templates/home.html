@@ -2,9 +2,9 @@
     <a href="#/settings" class="glyphicon glyphicon-cog"></a>
 </div>
 <div id="background" ng-style="{ 'background-image': 'url({{ backgroundImage }})' }">
-    <div id="time" ng-controller="ClockController">
-        <h1 class="time">{{ clock | date : "hh mm ss a" }}</h1>
-        <h2 class="time">{{ clock | date : "MM dd yyyy" }}</h2>
+    <div id="datetime" ng-controller="ClockController">
+        <h1 class="time purple-shadow">{{ clock | date : "hh mm ss a" }}</h1>
+        <h2 class="date blue-shadow">{{ clock | date : "MM dd yyyy" }}</h2>
         <p ng-show="showThisIsNow">this is now. what are you up to?</p>
     </div>
     <div id="weather" ng-controller="WeatherController" ng-show="userLocation">

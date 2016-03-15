@@ -11,38 +11,49 @@
     height: 100%;
     z-index: -1; 
     background-size: cover;  
+    background-color: #DADFE1;
 }
 
 /* Date and time */
-#time
+#datetime
 {
     text-align: center;
-    color: white;
     padding: 11%;
 }
 
-#time h1
+.time 
 {
     font-size: 7em;
+}   
+
+.date 
+{
+    font-size: 3em;
+}
+
+.purple-shadow
+{
+    color: white;
     text-shadow: 0 0 0.2em black, 0 0 0.2em #87F, 0 0 0.2em #87F;
     transition: text-shadow 1s;
 }
 
-#time h2
+.blue-shadow
 {
-    font-size: 3em;
+    color: white;
     text-shadow: 0 0 0.2em black, 0 0 0.2em #4775FF, 0 0 0.5em #4775FF;
     transition: text-shadow 1s;
 }
 
-#time p
+#datetime p
 {
+    color: white;
     text-shadow: 0 0 0.2em black, 0 0 0.2em #87F, 0 0 0.2em #87F;
     transition: text-shadow 1s;
     margin-top: 5%;
 }
 
-#time h1:hover, #time h2:hover, #time p:hover
+#datetime h1:hover, #datetime h2:hover, #datetime p:hover
 {
     text-shadow: 0 0 0.2em black, 0 0 0.2em #2303FF, 0 0 0.2em #2303FF;  
 }
@@ -137,10 +148,10 @@
     overflow-y: auto; 
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    /*background-color: rgba(0, 0, 0, 0.6);*/
+    background-color: rgba(255, 255, 255, 0.4);
     border-radius: 10px;
     padding: 10px;
-    color: white;
 }
 
 #showToDo
@@ -211,7 +222,7 @@ a:hover.glyphicon
 /* Settings */
 .background 
 {
-    background-color: #E4F1FE;
+    background-color: #DADFE1;
 }
 
 .settings h1
@@ -235,11 +246,11 @@ a:hover.glyphicon
 {
     position: relative;
     display: block;
-    width: 450px;
+    width: 420px;
     height: 2px;
     background-color: white;
     left: -375px;
-    margin: 5px 0px 15px;
+    margin: 10px 0px 15px;
     box-shadow: 0px 0px 10px 0px #87F;
     border-radius: 5px 5px 5px 5px;
 }
